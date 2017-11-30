@@ -1,5 +1,3 @@
-# only ignore the root TODO file, not subdir/TODO
-/TODO
 # ignore all files in the build/ directory
 node_modules/
 # ignore doc/notes.txt, but not doc/server/arch.txt
