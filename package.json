@@ -1,0 +1,29 @@
+{
+  "name": "Magic-Mirror-Module-LCDControl",
+  "version": "1.0.0",
+  "description": "LCD Control for the Magic Mirror.",
+  "repository":
+  {
+    "type": "git",
+    "url": "git+https://github.com/txukie/MMM-LCDControl"
+  },
+  "keywords": [
+    "magic mirror",
+    "smart mirror",
+    "LCD",
+    "module",
+    "PIR"
+  ],
+  "author": "Alberto de Tena Rojas",
+  "contributors": "https://github.com/txukie/MMM-LCDControl/graphs/contributors",
+  "license": "MIT",
+  "bugs":
+  {
+    "url": "https://github.com/txukie/MMM-LCDControl/issues"
+  },
+  "homepage": "https://github.com/txukie/MMM-LCDControl#readme",
+  "dependencies":
+  {
+    "python-shell": "latest"
+  }
+}

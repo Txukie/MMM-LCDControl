@@ -1,0 +1,8 @@
+{
+  "CMD_TELBOT_SWITCHON": "Turn the screen on",
+  "CMD_TELBOT_SWITCHOFF": "Turn the screen off",
+  "CMD_ASSTNT_SWITCHON": "screen switch on",
+  "CMD_ASSTNT_SWITCHON_DESCRIPTION": "Turn the screen on",
+  "CMD_ASSTNT_SWITCHOFF": "screen switch off",
+  "CMD_ASSTNT_SWITCHOFF_DESCRIPTION": "Turn the screen off"
+}
