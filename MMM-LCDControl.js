@@ -13,7 +13,8 @@ Module.register('MMM-LCDControl',
 	{
 		GPIO_PIR: 21,
                 GPIO_LCD_ONOFF: 20,
-                GPIO_LCD_STATUS: 12
+                GPIO_LCD_STATUS: 12,
+                screenOffTimer: 30
 	},
 
 	// Define required translations.
@@ -28,12 +29,12 @@ Module.register('MMM-LCDControl',
 	getCommands : function(register) {
     if (register.constructor.name == 'TelegramBotCommandRegister') {
       register.add({
-        command: 'screen switch off',
+        command: 'screenswitchoff',
         description: this.translate("CMD_TELBOT_SWITCHOFF"),
         callback: 'cmd_switchoff'
       })
       register.add({
-        command: 'screen switch on',
+        command: 'screenswitchon',
         description: this.translate("CMD_TELBOT_SWITCHON"),
         callback: 'cmd_switchon'
       })
@@ -55,13 +56,13 @@ Module.register('MMM-LCDControl',
         cmd_switchoff : function (command, handler)
 	{
     	Log.info('Trying to switch off the LCD');
-    	handler.response('Trying to switch off the LCD');
+    	handler.reply('TEXT','Trying to switch off the LCD',{parse_mode:'Markdown'});
     	this.sendSocketNotification('SWITCHOFF', this.config);
   	},
   	cmd_switchon : function (command, handler)
 	{
     	Log.info('Trying to switch on the LCD');
-    	handler.response('Trying to switch on the LCD');
+    	handler.reply('TEXT','Trying to switch on the LCD',{parse_mode:'Markdown'});
     	this.sendSocketNotification('SWITCHON', this.config);
   	},
 	start: function()

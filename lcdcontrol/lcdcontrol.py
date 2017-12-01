@@ -15,56 +15,48 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 import sys
+import json
 from time import sleep
-import RPi.GPIO as GPIO
+import config
 
-GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(20, GPIO.OUT)
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+def to_node(type, message):
+    # convert to json and print (node helper will read from stdout)
+    try:
+        print(json.dumps({type: message}))
+    except Exception:
+        pass
+    # stdout has to be flushed manually to prevent delays in the node helper communication
+    sys.stdout.flush()
 
 global timer
-global screenStatus
 timer = 0
 
-def flipSwitch():
-    GPIO.output(20, GPIO.LOW)
-    sleep(0.1)
-    GPIO.output(20, GPIO.HIGH)
-    sleep(1)
-
-def motionSensor(channel):
-    global timer
-    if GPIO.input(21):
-        print "Motion detected"
-        timer = 0
-        if screenStatus == 0:
-            print "Turning screen ON"
-            flipSwitch()
-
-def readLCDStatus(channel):
-    global screenStatus
-    screenStatus = GPIO.input(channel)
-
-GPIO.add_event_detect(21,GPIO.BOTH,callback=motionSensor, bouncetime=300)
-GPIO.add_event_detect(12,GPIO.BOTH,callback=readLCDStatus, bouncetime=300)
-
 try:
-    print "Initializing screen OFF"
-    readLCDStatus(12)
-    if screenStatus == 1:
-        flipSwitch()
+    to_node("status", "Initializing screen OFF")
+    import switchoff
+    switchoff.main()
 
     while True:
-        sleep(1)
+        import readPIR
+        readPIR.main()
+        PIRStatus = readPIR.PIRStatus
         timer += 1
-        if timer >= 30 and screenStatus == 1:
-            print "Turning screen OFF"
+        if timer >= config.get("screenOffTimer") and PIRStatus == 0:
+            to_node("status", "Turning screen OFF")
             timer = 0
-            flipSwitch()
+            import switchoff
+            switchoff.main()
+        if PIRStatus == 1:
+            to_node("status", "Motion detected. Turning screen ON")
+            timer = 0
+            import switchon
+            switchon.main()
+        
+        sleep(1)
+        
+except Exception, e:
+    to_node("status","Some unexpected error: " + str(e))
 
 finally:
-    GPIO.cleanup()
-    print "All done"
- 
+    to_node("status", "All done")

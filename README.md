@@ -15,7 +15,8 @@ The entry in config.js can look like the following. (NOTE: You only have to add 
 	{
 		GPIO_PIR: 21,
                 GPIO_LCD_ONOFF: 20,
-                GPIO_LCD_STATUS: 12
+                GPIO_LCD_STATUS: 12,
+                screenOffTimer: 30
 	}
 }
 ```

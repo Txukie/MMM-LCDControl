@@ -3,36 +3,26 @@ const NodeHelper = require('node_helper');
 
 const PythonShell = require('python-shell');
 var pythonStarted = false
+var pythonFlipping = false
 
 module.exports = NodeHelper.create({
   
   python_start: function () {
     const self = this;
     const pyshell = new PythonShell('modules/' + this.name + '/lcdcontrol/lcdcontrol.py', { mode: 'json', args: [JSON.stringify(this.config)]});
-
+    
     pyshell.on('message', function (message) {
-      
       if (message.hasOwnProperty('status'))
       {
         console.log("[" + self.name + "] " + message.status);
       }
-      if (message.hasOwnProperty('login'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.login.user - 1] + " with confidence " + message.login.confidence + " logged in.");
-        self.sendSocketNotification('user', {action: "login", user: message.login.user - 1, confidence: message.login.confidence});
-      }
-      if (message.hasOwnProperty('logout'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.logout.user - 1] + " logged out.");
-        self.sendSocketNotification('user', {action: "logout", user: message.logout.user - 1});
-      }
     });
-
-    pyshell.end(function (err)
-    {
-      if (err) throw err;
-      console.log("[" + self.name + "] " + 'finished running...');
-    });
+      pyshell.end(function (err)
+      {
+        if (err) throw err;
+        console.log("[" + self.name + "] " + 'finished running...');
+        pythonStarted = false;
+      });
   },
 
   python_switchoff: function () {
@@ -45,22 +35,13 @@ module.exports = NodeHelper.create({
       {
         console.log("[" + self.name + "] " + message.status);
       }
-      if (message.hasOwnProperty('login'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.login.user - 1] + " with confidence " + message.login.confidence + " logged in.");
-        self.sendSocketNotification('user', {action: "login", user: message.login.user - 1, confidence: message.login.confidence});
-      }
-      if (message.hasOwnProperty('logout'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.logout.user - 1] + " logged out.");
-        self.sendSocketNotification('user', {action: "logout", user: message.logout.user - 1});
-      }
     });
 
     pyshell.end(function (err)
     {
       if (err) throw err;
       console.log("[" + self.name + "] " + 'finished running...');
+      pythonFlipping = false;
     });
   },
 
@@ -68,21 +49,11 @@ module.exports = NodeHelper.create({
     const self = this;
     const pyshell = new PythonShell('modules/' + this.name + '/lcdcontrol/switchon.py', { mode: 'json', args: [JSON.stringify(this.config)]});
 
-    pyshell.on('message', function (message) {
-      
+    pyshell.on('message', function (message)
+    {
       if (message.hasOwnProperty('status'))
       {
         console.log("[" + self.name + "] " + message.status);
-      }
-      if (message.hasOwnProperty('login'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.login.user - 1] + " with confidence " + message.login.confidence + " logged in.");
-        self.sendSocketNotification('user', {action: "login", user: message.login.user - 1, confidence: message.login.confidence});
-      }
-      if (message.hasOwnProperty('logout'))
-      {
-        console.log("[" + self.name + "] " + "User " + self.config.users[message.logout.user - 1] + " logged out.");
-        self.sendSocketNotification('user', {action: "logout", user: message.logout.user - 1});
       }
     });
 
@@ -90,6 +61,7 @@ module.exports = NodeHelper.create({
     {
       if (err) throw err;
       console.log("[" + self.name + "] " + 'finished running...');
+      pythonFlipping = false;
     });
   },
 
@@ -107,18 +79,18 @@ module.exports = NodeHelper.create({
     if(notification === 'SWITCHOFF')
     {
       this.config = payload
-      if(!pythonStarted)
+      if(!pythonFlipping)
       {
-        pythonStarted = true;
+        pythonFlipping = true;
         this.python_switchoff();
       };
     };
     if(notification === 'SWITCHON')
     {
       this.config = payload
-      if(!pythonStarted)
+      if(!pythonFlipping)
       {
-        pythonStarted = true;
+        pythonFlipping = true;
         this.python_switchon();
       };
     };

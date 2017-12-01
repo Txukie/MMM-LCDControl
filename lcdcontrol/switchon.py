@@ -17,33 +17,49 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 import sys
 from time import sleep
 import RPi.GPIO as GPIO
+import json
+import config
 
-GPIO.setmode(GPIO.BCM)
+def to_node(type, message):
+    # convert to json and print (node helper will read from stdout)
+    try:
+        print(json.dumps({type: message}))
+    except Exception:
+        pass
+    # stdout has to be flushed manually to prevent delays in the node helper communication
+    sys.stdout.flush()
 
-GPIO.setup(20, GPIO.OUT)
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-global timer
-global screenStatus
-timer = 0
 
 def flipSwitch():
-    GPIO.output(20, GPIO.LOW)
+    GPIO.output(config.get("GPIO_LCD_ONOFF"), GPIO.LOW)
     sleep(0.1)
-    GPIO.output(20, GPIO.HIGH)
-    sleep(1)
+    GPIO.output(config.get("GPIO_LCD_ONOFF"), GPIO.HIGH)
 
 def readLCDStatus(channel):
     global screenStatus
     screenStatus = GPIO.input(channel)
 
-try:
-    print "Turning screen ON"
-    readLCDStatus(12)
-    if screenStatus == 0:
-        flipSwitch()
+def main():
+    GPIO.setmode(GPIO.BCM)
 
-finally:
-    GPIO.cleanup()
-    print "All done"
- 
+    GPIO.setup(config.get("GPIO_LCD_ONOFF"), GPIO.OUT)
+    GPIO.setup(config.get("GPIO_LCD_STATUS"), GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+    global timer
+    global screenStatus
+    timer = 0
+    
+    try:
+        readLCDStatus(config.get("GPIO_LCD_STATUS"))
+        if screenStatus == 0:
+            flipSwitch()
+
+        GPIO.cleanup()
+        
+    except Exception, e:
+        to_node("status","Some unexpected error: " + str(e))
+
+
+if __name__ == "__main__":
+    main()
